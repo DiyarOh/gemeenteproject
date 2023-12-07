@@ -1,10 +1,9 @@
-
-from django.contrib import admin
 from django.urls import path
-from .views import ComplaintsFormView
+from .views import ComplaintsFormView, register_view
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('klachtenformulier/', ComplaintsFormView.as_view(), name='complaints_form'),
+    path('register/<str:invitation_code>/', register_view, name='register_with_invitation'),
+
 ]

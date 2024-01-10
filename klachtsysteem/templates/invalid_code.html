@@ -1,0 +1,16 @@
+<!-- Kopieer deze layout zodat je nieuwe paginas gemakkelijk kan programmeren -->
+{% extends 'base.html' %}
+
+{% block title %}Invalid Code{% endblock %}
+
+{% block content %}
+<section class="login_body">
+<div class="message-container">
+    <h2>Invalid Invitation Code</h2>
+    <p class="error-message">Uw invitatie code ontbreekt of is onjuist. <br>Heeft u deze nog niet ontvangen neem dan contact op met een administrator.</p>
+    <form action="{% url 'login' %}">
+      <button type="submit">Go to Login</button>
+    </form>
+  </div>
+</section>
+  {% endblock %}

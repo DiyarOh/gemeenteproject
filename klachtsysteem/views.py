@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 from django.contrib.auth.forms import UserCreationForm
@@ -10,6 +12,9 @@ from .models import Invitation
 # Create your views here.
 
 def login_view(request):
+    if request.user.is_authenticated:
+        # If the user is logged in, redirect them to the home page
+        return redirect('home') 
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -18,12 +23,16 @@ def login_view(request):
             login(request, user)
             return redirect('home')
         else:
-            return render(request, 'login.html', {'error': 'Invalid credentials'})
+            return render(request, 'login.html', {'errors': ['Invalid credentials']})
 
     return render(request, 'login.html')
 
 
 def register_view(request, invitation_code=None):
+    if request.user.is_authenticated:
+        # If the user is logged in, redirect them to the home page
+        return redirect('home') 
+
     # Check if the invitation code is valid
     if invitation_code is None or not is_valid_invitation_code(invitation_code) or invitation_code == '':
         return redirect('invalid_code')
@@ -43,8 +52,14 @@ def register_view(request, invitation_code=None):
     return render(request, 'register.html', {'form': form, 'invitation_code': invitation_code})
 
 def invalid_code_view(request):
+    if request.user.is_authenticated:
+        # If the user is logged in, redirect them to the home page
+        return redirect('home') 
     return render(request, 'invalid_code.html')
 
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 class ComplaintsFormView(TemplateView):
     template_name = "klachtenformulier.html"

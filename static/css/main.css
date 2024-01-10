@@ -104,7 +104,7 @@ body {
   }
 
   /* dashboard styling */
-  .header {
+.header {
     background-color: #4CAF50;
     color: white;
     padding: 20px;
@@ -121,6 +121,7 @@ body {
 
 .menu-buttons button {
     background-color: #4CAF50;
+    font-size: x-large;
     color: white;
     border: none;
     padding: 10px 20px;

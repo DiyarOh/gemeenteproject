@@ -74,6 +74,7 @@ class ComplaintsDashboard(ListView):
     template_name = 'klachtbeheer.html'
     context_object_name = 'klachten'
     paginate_by = 10
+    ordering = ['-datum_melding']
 
     def get_queryset(self):
         search_query = self.request.GET.get('search_query')

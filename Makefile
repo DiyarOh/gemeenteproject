@@ -39,4 +39,4 @@ admin:
 
 .PHONY: test
 test: 
-	docker compose run web python manage.py test
+	docker compose run web python manage.py test klachtsysteem.tests

@@ -1,6 +1,8 @@
 body {
+    font-family: Arial, sans-serif;
     padding: 0;
     margin: 0;
+    background-color: #f9f9f9;
 }
 /* Login CSS */
 .login_body {
@@ -100,3 +102,130 @@ body {
     border-radius: 5px;
     box-sizing: border-box;
   }
+
+  /* dashboard styling */
+  .header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+
+.menu-buttons {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.menu-buttons button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.main-content {
+    padding: 20px;
+}
+
+.search-section {
+    margin-bottom: 20px;
+}
+
+.search-form {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-gap: 10px;
+    align-items: center;
+}
+
+.search-form .form-label {
+    margin-right: 10px;
+}
+
+.search-form input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.filters-section {
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+
+.results-section {
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+}
+
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.results-table th, .results-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.pagination {
+    text-align: center;
+}
+
+.pagination a {
+    padding: 8px 16px;
+    text-decoration: none;
+    background-color: #ddd;
+    color: black;
+    margin: 0 4px;
+}
+
+.pagination a:hover {
+    background-color: #ccc;
+}
+
+.pagination span {
+    padding: 8px 16px;
+    margin: 0 4px;
+}
+
+.flex-container {
+    display: flex;
+    justify-content: space-evenly;
+    margin: 20px;
+}
+
+.filters-section, .results-section {
+    flex: 1; /* This ensures that both sections take up equal space */
+    margin: 0 10px; /* This adds some space between the two sections */
+}
+
+.search-form {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    margin: 5%;
+}
+
+.search-form h2 {
+    margin-bottom: 10px;
+}
+
+.search-form button {
+    margin-top: 10px; /* Space between the button and the last input */
+}
+
+.results-table {
+    width: 100%;
+    /* other styles */
+}

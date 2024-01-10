@@ -3,5 +3,57 @@
 {% block title %}Klachtbeheer{% endblock %}
 
 {% block content %}
-<!-- Dit is waar je de content plaats weet dat de basehtml geen container heeft deze dien je dus hier zelf te plaatsen -->
+<main class="main-content">
+    <section class="search-section">
+        <form method="get" action="" class="search-form">
+            <label for="search" class="form-label">Klacht Zoeken:</label>
+            <input type="text" id="search" name="q" value="{{ request.GET.q }}" placeholder="Enter keywords">
+            <button type="submit">Zoeken</button>
+        </form>
+    </section>
+    <section class="flex-container">
+        <section class="filters-section">
+            <p>Filters:</p>
+            {{ search_form.as_p }}
+            <button type="submit">Zoeken</button>
+        </section>
+
+        <section class="results-section">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Omschrijving</th>
+                        <th>Status</th>
+                        <th>Datum</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for klacht in klachten %}
+                    <tr>
+                        <td>{{ klacht.omschrijving }}</td>
+                        <td>{{ klacht.status }}</td>
+                        <td>{{ klacht.datum|date:"d-m-Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">Geen klachten gevonden.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                {% if klachten.has_previous %}
+                <a href="?page={{ klachten.previous_page_number }}">Vorige</a>
+                {% endif %}
+                <span>Pagina {{ klachten.number }} van {{ klachten.paginator.num_pages }}</span>
+                {% if klachten.has_next %}
+                <a href="?page={{ klachten.next_page_number }}">Volgende</a>
+                {% endif %}
+            </div>
+        </section>
+    </section>
+
+</main>
 {% endblock %}

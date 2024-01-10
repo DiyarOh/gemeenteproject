@@ -3,11 +3,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 from django.views.generic.edit import FormView
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.contrib.auth.forms import UserCreationForm
 from django.views import View
 from .utils import is_valid_invitation_code 
-from .models import Invitation
+from .models import Invitation, Klacht, Status
+from .forms import ComplaintSearchForm
 
 # Create your views here.
 
@@ -66,3 +67,38 @@ class ComplaintsFormView(TemplateView):
 
 class HomePageView(TemplateView):
     template_name = "homepage.html"
+
+
+class ComplaintsDashboard(ListView):
+    model = Klacht
+    template_name = 'klachtbeheer.html'
+    context_object_name = 'klachten'
+    paginate_by = 10
+
+    def get_queryset(self):
+        search_query = self.request.GET.get('search_query')
+        start_date = self.request.GET.get('start_date')
+        end_date = self.request.GET.get('end_date')
+        status = self.request.GET.get('status')
+
+        queryset = Klacht.objects.all()
+
+        if search_query:
+            queryset = queryset.filter(naam__icontains=search_query)
+
+        if start_date:
+            queryset = queryset.filter(datum_melding__gte=start_date)
+
+        if end_date:
+            queryset = queryset.filter(datum_melding__lte=end_date)
+
+        if status:
+            queryset = queryset.filter(status__id=status)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_form'] = ComplaintSearchForm(self.request.GET)
+        context['statuses'] = Status.objects.all()  # Provide status choices to the template
+        return context

@@ -9,6 +9,13 @@
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
 </head>
 <body>
+    <div class="header">
+        <h1>Klachtbeheer Rotterdam</h1>
+        <div class="menu-buttons">
+            <button onclick="location.href='kaart-url'">Kaart</button>
+            <button onclick="location.href='klachten-url'">Klachten</button>
+        </div>
+    </div>
     {% block content %}
     {% endblock %}
 </body>

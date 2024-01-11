@@ -6,17 +6,20 @@
 <main class="main-content">
     <section class="search-section">
         <form method="get" action="" class="search-form">
-            <label for="search" class="form-label">Klacht Zoeken:</label>
-            <input type="text" id="search" name="q" value="{{ request.GET.q }}" placeholder="Enter keywords">
+            <label for="search" class="form-label">Klachtomschrijving Zoeken:</label>
+            <input type="text" id="search" name="search_desc" value="{{ request.GET.q }}" placeholder="Enter keywords">
             <button type="submit">Zoeken</button>
         </form>
     </section>
     <section class="flex-container">
-        <section class="filters-section">
-            <p>Filters:</p>
-            {{ search_form.as_p }}
-            <button type="submit">Zoeken</button>
-        </section>
+        <form method="get" action="">
+            <section class="filters-section">
+                <p>Filters:</p>
+                {{ search_form.as_p }}
+                <button type="submit">Zoeken</button>
+            </section>
+        </form>
+
 
         <section class="results-section">
             <table class="results-table">
@@ -31,8 +34,8 @@
                     {% for klacht in klachten %}
                     <tr>
                         <td>{{ klacht.omschrijving }}</td>
-                        <td>{{ klacht.status }}</td>
-                        <td>{{ klacht.datum|date:"d-m-Y" }}</td>
+                        <td>{{ klacht.status.waarde }}</td>
+                        <td>{{ klacht.datum_melding|date:"d-m-Y" }}</td>
                     </tr>
                     {% empty %}
                     <tr>

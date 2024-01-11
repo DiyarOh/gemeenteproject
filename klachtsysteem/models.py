@@ -28,6 +28,30 @@ class Status(models.Model):
     waarde = models.CharField(max_length=255)  # Value of the status
     beschrijving = models.TextField()
 
+    def seed_status_data():
+        # Define a list of basic statuses
+        status_data = [
+            {'waarde': 'Open', 'beschrijving': 'The complaint is open and not yet resolved.'},
+            {'waarde': 'In Progress', 'beschrijving': 'The complaint is currently being addressed.'},
+            {'waarde': 'Closed', 'beschrijving': 'The complaint has been resolved and closed.'},
+        ]
+
+        # Create status objects if they don't already exist
+        for status_info in status_data:
+            status, created = Status.objects.get_or_create(
+                waarde=status_info['waarde'],
+                beschrijving=status_info['beschrijving']
+            )
+
+            if created:
+                print(f"Created status: {status}")
+
+    if __name__ == "__main__":
+        seed_status_data()
+
+    def __str__(self):
+        return self.waarde
+
 
 class Klacht(models.Model):
     naam = models.CharField(max_length=50, null=False)

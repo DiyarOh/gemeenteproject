@@ -39,4 +39,8 @@ admin:
 
 .PHONY: test
 test: 
-	docker compose run web python manage.py test
+	docker compose run web python manage.py test klachtsysteem.tests
+
+.PHONY: seed
+seed:
+	docker compose run web python manage.py shell -c "from seeders import seed_data; seed_data.seed_status_data(); seed_data.seed_klacht_data()"

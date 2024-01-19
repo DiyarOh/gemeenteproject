@@ -48,11 +48,11 @@
             <!-- Pagination -->
             <div class="pagination">
                 {% if klachten.has_previous %}
-                <a href="?page={{ klachten.previous_page_number }}">Vorige</a>
+                    <a href="?page={{ klachten.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Vorige</a>
                 {% endif %}
                 <span>Pagina {{ klachten.number }} van {{ klachten.paginator.num_pages }}</span>
                 {% if klachten.has_next %}
-                <a href="?page={{ klachten.next_page_number }}">Volgende</a>
+                    <a href="?page={{ klachten.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Volgende</a>
                 {% endif %}
             </div>
         </section>

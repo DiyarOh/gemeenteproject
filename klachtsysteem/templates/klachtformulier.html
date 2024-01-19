@@ -2,56 +2,48 @@
 
 {% block title %}Klachtformulier{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- Include SweetAlert2 CSS and JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<style>
+    #map {
+        height: 480px;
+        width: 735px;
+        float: left;
+    }
+
+    #form-container {
+        margin-left: 750px;
+    }
+
+    .form-field {
+        margin-bottom: 10px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input,
+    textarea,
+    select {
+        width: calc(100% - 12px);
+        padding: 5px;
+        box-sizing: border-box;
+    }
+
+    button {
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <title>GPS Map</title>
-    <!-- Include Leaflet CSS and JS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Include jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <!-- Include SweetAlert2 CSS and JS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
-    <!-- Custom CSS styles -->
-    <style>
-        #map {
-            height: 480px;
-            width: 735px;
-            float: left;
-        }
-
-        #form-container {
-            margin-left: 750px;
-        }
-
-        .form-field {
-            margin-bottom: 10px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input,
-        textarea,
-        select {
-            width: calc(100% - 12px);
-            padding: 5px;
-            box-sizing: border-box;
-        }
-
-        button {
-            margin-top: 10px;
-        }
-    </style>
-</head>
-
 <body>
     <!-- Leaflet Map Container -->
     <div id="map"></div>
@@ -87,10 +79,12 @@
         </form>
     </div>
 
+{% endblock %}
+{% block scripts %}
     <!-- JavaScript for Leaflet Map and Form Submission -->
     <script>
         // Initialize Leaflet map
-        var map = L.map('map').setView([51.505, -0.09], 13);
+        let map = L.map('map').setView([51.9225, 4.47917], 13);
 
         // Add OpenStreetMap tile layer
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -98,8 +92,8 @@
         }).addTo(map);
 
         // Initialize variables for marker and coordinates input
-        var marker;
-        var coordinatesInput = document.getElementById('GPS_locatie');
+        let marker;
+        let coordinatesInput = document.getElementById('GPS_locatie');
 
         // Add click event listener to update marker and coordinates on map click
         map.on('click', function (e) {
@@ -119,7 +113,7 @@
             event.preventDefault();
 
             // Get form data
-            var formData = $(this).serializeArray();
+            let formData = $(this).serializeArray();
 
             // Add latitude and longitude to the formData array
             formData.push({ name: 'latitude', value: marker.getLatLng().lat });
@@ -160,8 +154,4 @@
             });
         });
     </script>
-
-</body>
-
-</html>
 {% endblock %}

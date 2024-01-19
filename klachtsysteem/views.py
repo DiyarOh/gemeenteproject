@@ -108,7 +108,7 @@ class ComplaintsDashboard(ListView):
 
         # Retrieve all complaints and order by submission date
         queryset = Klacht.objects.all()
-        queryset = queryset.order_by('datum_melding')
+        queryset = queryset.order_by('-datum_melding')
 
         # Apply filters based on parameters
         if search_query:

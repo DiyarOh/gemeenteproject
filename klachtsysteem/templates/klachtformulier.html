@@ -3,5 +3,165 @@
 {% block title %}Klachtformulier{% endblock %}
 
 {% block content %}
-<!-- Dit is waar je de content plaats weet dat de basehtml geen container heeft deze dien je dus hier zelf te plaatsen -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>GPS Map</title>
+    <!-- Include Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- Include SweetAlert2 CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+    <!-- Custom CSS styles -->
+    <style>
+        #map {
+            height: 480px;
+            width: 735px;
+            float: left;
+        }
+
+        #form-container {
+            margin-left: 750px;
+        }
+
+        .form-field {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input,
+        textarea,
+        select {
+            width: calc(100% - 12px);
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Leaflet Map Container -->
+    <div id="map"></div>
+
+    <!-- Form Container -->
+    <div id="form-container">
+        <!-- Klacht Submission Form -->
+        <form id="gpsForm" method="post" action="{% url 'submit_klacht' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Add form fields for Klacht model -->
+            <div class="form-field">
+                <label for="naam">Naam:</label>
+                <input type="text" id="naam" name="naam" required>
+            </div>
+
+            <div class="form-field">
+                <label for="omschrijving">Omschrijving:</label>
+                <textarea id="omschrijving" name="omschrijving" required></textarea>
+            </div>
+
+            <div class="form-field">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <!-- Hidden input for GPS coordinates -->
+            <input type="hidden" id="GPS_locatie" name="GPS_locatie" required>
+
+            <div class="form-field">
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- JavaScript for Leaflet Map and Form Submission -->
+    <script>
+        // Initialize Leaflet map
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Initialize variables for marker and coordinates input
+        var marker;
+        var coordinatesInput = document.getElementById('GPS_locatie');
+
+        // Add click event listener to update marker and coordinates on map click
+        map.on('click', function (e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            marker = L.marker(e.latlng).addTo(map);
+
+            // Set the value of the hidden input in WKT format
+            coordinatesInput.value = `${e.latlng.lng} ${e.latlng.lat}`;
+        });
+
+        // Add event listener for form submission
+        $('#gpsForm').submit(function (event) {
+            // Prevent the default form submission
+            event.preventDefault();
+
+            // Get form data
+            var formData = $(this).serializeArray();
+
+            // Add latitude and longitude to the formData array
+            formData.push({ name: 'latitude', value: marker.getLatLng().lat });
+            formData.push({ name: 'longitude', value: marker.getLatLng().lng });
+
+            // Make an AJAX request to your Django view
+            $.ajax({
+                type: 'POST',
+                url: '{% url "submit_klacht" %}',
+                data: formData,
+                headers: {
+                    'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function (response) {
+                    // Display a success popup
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Klacht submitted successfully!',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        // Redirect to a different HTML page after clicking "OK"
+                        if (result.isConfirmed) {
+                            window.location.href = '{% url "complaints_dashboard" %}';
+                        }
+                    });
+                },
+                error: function (error) {
+                    // Display an error popup
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Error submitting klacht!',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                    // Handle error, if needed
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
 {% endblock %}

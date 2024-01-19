@@ -20,7 +20,7 @@ class LoginViewTest(TestCase):
     def test_login_view_post_success(self):
         response = self.client.post('/login/', {'username': 'testuser', 'password': 'testpassword'})
         self.assertEqual(response.status_code, 302)  # 302 is the status code for a redirect
-        self.assertRedirects(response, '/')
+        self.assertRedirects(response, '/klacht/dashboard/')
 
     def test_login_view_post_failure(self):
         response = self.client.post('/login/', {'username': 'testuser', 'password': 'wrongpassword'})

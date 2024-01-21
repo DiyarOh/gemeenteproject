@@ -114,6 +114,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# Set the maximum file size for in-memory file uploads (10MB in this example)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Set the maximum size for request data (including files) (10MB in this example)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 

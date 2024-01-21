@@ -2,6 +2,79 @@
 
 {% block title %}Kaart{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- Include SweetAlert2 CSS and JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<style>
+    body{
+        overflow: hidden;
+    }
+    #map {
+        height: 100vh;
+        width: 100%;
+    }
+
+    #form-container {
+        margin-left: 750px;
+    }
+
+    .form-field {
+        margin-bottom: 10px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input,
+    textarea,
+    select {
+        width: calc(100% - 12px);
+        padding: 5px;
+        box-sizing: border-box;
+    }
+
+    button {
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
 {% block content %}
-<!-- Dit is waar je de content plaats weet dat de basehtml geen container heeft deze dien je dus hier zelf te plaatsen -->
+<div id="map"></div>
+<script type="text/javascript">
+    // Initialize the map
+    let map = L.map('map').setView([51.9225, 4.47917], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Use the passed Klacht data
+    let klachtenData = JSON.parse('{{ klachten_json|escapejs }}');
+    
+    klachtenData.forEach(function(klacht) {
+    let coords = [klacht.GPS_locatie.lat, klacht.GPS_locatie.lng];
+    let popupContent = `
+        <strong>Omschrijving:</strong> ${klacht.omschrijving}<br>
+        <strong>Naam:</strong> ${klacht.naam}<br>
+        <strong>Datum:</strong> ${new Date(klacht.datum_melding).toLocaleString()}
+    `;
+     let marker = L.marker(coords).addTo(map)
+        .bindPopup(popupContent);
+    // Store the Klacht ID in a custom attribute of the marker
+    marker._klachtId = klacht.id;
+
+    marker.on('dblclick', function() {
+        window.location.href = '/klacht/' + klacht.id; // Redirect to the Klacht detail page
+    });
+});
+
+</script>
+{% endblock %}
+{% block script %}
 {% endblock %}

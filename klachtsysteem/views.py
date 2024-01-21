@@ -1,4 +1,6 @@
 # views.py
+import json
+
 from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
@@ -17,6 +19,10 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db import models as geomodels
 from django.http import JsonResponse
 from django.utils import timezone
+from django.core.serializers import serialize
+from django.utils.dateformat import DateFormat
+
+
 
 # Make sure to import Status model
 from .models import Klacht, Status, Afbeelding
@@ -82,6 +88,20 @@ def logout_view(request):
     # Logout and redirect to login
     logout(request)
     return redirect('login')
+
+
+def serialize_klachten(klachten):
+    # This function will manually serialize the Klacht data and format the dates
+    return json.dumps([
+        {
+            'id': klacht.id,  # Include the ID
+            'naam': klacht.naam,
+            'omschrijving': klacht.omschrijving,
+            'GPS_locatie': {'lat': klacht.GPS_locatie.y, 'lng': klacht.GPS_locatie.x},
+            'datum_melding': DateFormat(klacht.datum_melding).format('c')  # ISO 8601 format
+        }
+        for klacht in klachten
+    ])
 
 # Complaints form view
 class ComplaintsFormView(TemplateView):
@@ -202,51 +222,16 @@ class ComplaintsDashboard(ListView):
 
         return context
 
-# Submit klacht view
-def submit_klacht(request):
-    if request.method == 'POST':
-        print(request.FILES)
-        form = KlachtForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Retrieve form data using cleaned_data
-            naam = form.cleaned_data['naam']
-            omschrijving = form.cleaned_data['omschrijving']
-            email = form.cleaned_data['email']
-            longitude = form.cleaned_data['longitude']  # Change this line
-            latitude = form.cleaned_data['latitude']      # Change this line
-            foto = form.cleaned_data['foto']
+class KlachtMapView(TemplateView):
+    template_name = 'klachtmap.html'
 
-            # Get or create the Status object with ID 1
-            status, created = Status.objects.get_or_create(id=1, defaults={'waarde': 'Default', 'beschrijving': 'Default status'})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-            # Create Klacht object
-            klacht = Klacht(
-                naam=naam,
-                omschrijving=omschrijving,
-                email=email,
-                GPS_locatie=Point(float(longitude), float(latitude)),
-                datum_melding=timezone.now(),
-                status=status
-            )
+        # Retrieve all Klacht objects from the database
+        klachten = Klacht.objects.all()
 
-            try:
-                # Save the Klacht object
-                klacht.save()
-                print(foto)
+        # Add the serialized data to the context
+        context['klachten_json'] = serialize_klachten(klachten)
 
-                # Save uploaded files to the DB
-                if foto:
-                    afbeelding = Afbeelding(klacht=klacht)
-                    afbeelding.image_file = foto
-                    afbeelding.save()
-
-                return JsonResponse({'message': 'Klacht submitted successfully!'}, status=201)
-            except Exception as e:
-                return HttpResponse(f"An error occurred: {e}")
-        else:
-            # Form is not valid, return validation errors as JSON
-            errors = form.errors.as_json()
-            return JsonResponse({'errors': errors}, status=400)
-
-    # Handle GET request or other cases
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
+        return context

@@ -50,37 +50,40 @@
 
     <!-- Form Container -->
     <div id="form-container">
+        <script>
+            window.onload = function() {
+                {% if message %}
+                    Swal.fire({
+                        title: 'Success!',
+                        text: '{{ message }}',
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    });
+                {% endif %}
+                {% if error %}
+                    Swal.fire({
+                        title: 'Error!',
+                        text: '{{ error }}',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                {% endif %}
+            };
+        </script>
         <!-- Klacht Submission Form -->
-        <form id="gpsForm" method="post" action="{% url 'submit_klacht' %}" enctype="multipart/form-data">
+        <form enctype="multipart/form-data" id="gpsForm" method="post">
             {% csrf_token %}
-
-            <!-- Add form fields for Klacht model -->
+            {{ form.as_p }}
             <div class="form-field">
-                <label for="naam">Naam:</label>
-                <input type="text" id="naam" name="naam" required>
-            </div>
-
-            <div class="form-field">
-                <label for="omschrijving">Omschrijving:</label>
-                <textarea id="omschrijving" name="omschrijving" required></textarea>
-            </div>
-
-            <div class="form-field">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-
-            <!-- Hidden input for GPS coordinates -->
-            <input type="hidden" id="GPS_locatie" name="GPS_locatie" required>
-
-            <div class="form-field">
-                <button type="submit">Submit</button>
+                <button type="submit" id="submit-button" disabled>Submit</button>
             </div>
         </form>
     </div>
 
 {% endblock %}
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.all.min.js"></script>
+
     <!-- JavaScript for Leaflet Map and Form Submission -->
     <script>
         // Initialize Leaflet map
@@ -93,7 +96,9 @@
 
         // Initialize variables for marker and coordinates input
         let marker;
-        let coordinatesInput = document.getElementById('GPS_locatie');
+        let longitudeInput = document.getElementById('longitude');
+        let latitudeInput = document.getElementById('latitude');
+        let submitButton = document.getElementById('submit-button');
 
         // Add click event listener to update marker and coordinates on map click
         map.on('click', function (e) {
@@ -103,55 +108,59 @@
 
             marker = L.marker(e.latlng).addTo(map);
 
-            // Set the value of the hidden input in WKT format
-            coordinatesInput.value = `${e.latlng.lng} ${e.latlng.lat}`;
+        longitudeInput.value = e.latlng.lng;
+        latitudeInput.value = e.latlng.lat;
+        
+        // Enable the submit button
+        submitButton.disabled = false;
+
         });
 
         // Add event listener for form submission
-        $('#gpsForm').submit(function (event) {
-            // Prevent the default form submission
-            event.preventDefault();
+        // $('#gpsForm').submit(function (event) {
+        //     // Prevent the default form submission
+        //     event.preventDefault();
 
-            // Get form data
-            let formData = $(this).serializeArray();
+        //     // Get form data
+        //     let formData = $(this).serializeArray();
 
-            // Add latitude and longitude to the formData array
-            formData.push({ name: 'latitude', value: marker.getLatLng().lat });
-            formData.push({ name: 'longitude', value: marker.getLatLng().lng });
+        //     // Add latitude and longitude to the formData array
+        //     formData.push({ name: 'latitude', value: marker.getLatLng().lat });
+        //     formData.push({ name: 'longitude', value: marker.getLatLng().lng });
 
-            // Make an AJAX request to your Django view
-            $.ajax({
-                type: 'POST',
-                url: '{% url "submit_klacht" %}',
-                data: formData,
-                headers: {
-                    'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()
-                },
-                success: function (response) {
-                    // Display a success popup
-                    Swal.fire({
-                        title: 'Success!',
-                        text: 'Klacht submitted successfully!',
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        // Redirect to a different HTML page after clicking "OK"
-                        if (result.isConfirmed) {
-                            window.location.href = '{% url "complaints_dashboard" %}';
-                        }
-                    });
-                },
-                error: function (error) {
-                    // Display an error popup
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Error submitting klacht!',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                    // Handle error, if needed
-                }
-            });
-        });
+        //     // Make an AJAX request to your Django view
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: '{% url "submit_klacht" %}',
+        //         data: formData,
+        //         headers: {
+        //             'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()
+        //         },
+        //         success: function (response) {
+        //             // Display a success popup
+        //             Swal.fire({
+        //                 title: 'Success!',
+        //                 text: 'Klacht submitted successfully!',
+        //                 icon: 'success',
+        //                 confirmButtonText: 'OK'
+        //             }).then((result) => {
+        //                 // Redirect to a different HTML page after clicking "OK"
+        //                 if (result.isConfirmed) {
+        //                     window.location.href = '{% url "complaints_dashboard" %}';
+        //                 }
+        //             });
+        //         },
+        //         error: function (error) {
+        //             // Display an error popup
+        //             Swal.fire({
+        //                 title: 'Error!',
+        //                 text: 'Error submitting klacht!',
+        //                 icon: 'error',
+        //                 confirmButtonText: 'OK'
+        //             });
+        //             // Handle error, if needed
+        //         }
+        //     });
+        // });
     </script>
 {% endblock %}

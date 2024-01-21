@@ -11,7 +11,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.views import View
 from .utils import is_valid_invitation_code 
 from .models import Invitation, Klacht, Status
-from .forms import ComplaintSearchForm
+from .forms import ComplaintSearchForm, KlachtForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db import models as geomodels
@@ -19,7 +19,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 # Make sure to import Status model
-from .models import Klacht, Status
+from .models import Klacht, Status, Afbeelding
 
 # Login view
 def login_view(request):
@@ -86,6 +86,55 @@ def logout_view(request):
 # Complaints form view
 class ComplaintsFormView(TemplateView):
     template_name = "klachtformulier.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = KlachtForm()  # Add the form to the context
+        return context
+    
+    def post(self, request):
+        print(request.FILES)
+        form = KlachtForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Retrieve form data using cleaned_data
+            naam = form.cleaned_data['naam']
+            omschrijving = form.cleaned_data['omschrijving']
+            email = form.cleaned_data['email']
+            longitude = form.cleaned_data['longitude']  # Change this line
+            latitude = form.cleaned_data['latitude']      # Change this line
+            foto = form.cleaned_data['foto']
+
+            # Get or create the Status object with ID 1
+            status, created = Status.objects.get_or_create(id=1, defaults={'waarde': 'Default', 'beschrijving': 'Default status'})
+
+            # Create Klacht object
+            klacht = Klacht(
+                naam=naam,
+                omschrijving=omschrijving,
+                email=email,
+                GPS_locatie=Point(float(longitude), float(latitude)),
+                datum_melding=timezone.now(),
+                status=status
+            )
+
+            try:
+                # Save the Klacht object
+                klacht.save()
+                print(foto)
+
+                # Save uploaded files to the DB
+                if foto:
+                    afbeelding = Afbeelding(klacht=klacht)
+                    afbeelding.image_file = foto
+                    afbeelding.save()
+
+                return render(request, self.template_name, {'message': 'Klacht submitted successfully!', 'form': form})
+            except Exception as e:
+                return render(request, self.template_name, {'error': f"An error occurred: {e}"})
+        else:
+            # Form is not valid, return the form with errors
+            return render(request, self.template_name, {'form': form})
+
 
 # Home page view
 class HomePageView(TemplateView):
@@ -156,20 +205,16 @@ class ComplaintsDashboard(ListView):
 # Submit klacht view
 def submit_klacht(request):
     if request.method == 'POST':
-        # Retrieve form data
-        naam = request.POST.get('naam')
-        omschrijving = request.POST.get('omschrijving')
-        email = request.POST.get('email')
-        longitude_str = request.POST.get('longitude')
-        latitude_str = request.POST.get('latitude')
-
-        # Check if longitude and latitude are provided
-        if longitude_str is not None and latitude_str is not None:
-            try:
-                longitude = float(longitude_str)
-                latitude = float(latitude_str)
-            except ValueError:
-                return JsonResponse({'error': 'Invalid longitude or latitude format'}, status=400)
+        print(request.FILES)
+        form = KlachtForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Retrieve form data using cleaned_data
+            naam = form.cleaned_data['naam']
+            omschrijving = form.cleaned_data['omschrijving']
+            email = form.cleaned_data['email']
+            longitude = form.cleaned_data['longitude']  # Change this line
+            latitude = form.cleaned_data['latitude']      # Change this line
+            foto = form.cleaned_data['foto']
 
             # Get or create the Status object with ID 1
             status, created = Status.objects.get_or_create(id=1, defaults={'waarde': 'Default', 'beschrijving': 'Default status'})
@@ -179,20 +224,29 @@ def submit_klacht(request):
                 naam=naam,
                 omschrijving=omschrijving,
                 email=email,
-                GPS_locatie=Point(longitude, latitude),
+                GPS_locatie=Point(float(longitude), float(latitude)),
                 datum_melding=timezone.now(),
                 status=status
             )
 
-            # Save the Klacht object
-            klacht.save()
+            try:
+                # Save the Klacht object
+                klacht.save()
+                print(foto)
 
-            # Log the submitted data for debugging
-            print(f"Submitted Klacht: Naam={naam}, Omschrijving={omschrijving}, Email={email}, Longitude={longitude}, Latitude={latitude}")
+                # Save uploaded files to the DB
+                if foto:
+                    afbeelding = Afbeelding(klacht=klacht)
+                    afbeelding.image_file = foto
+                    afbeelding.save()
 
-            return JsonResponse({'message': 'Klacht submitted successfully!'}, status=201)
-
-        return JsonResponse({'error': 'Longitude and latitude are required'}, status=400)
+                return JsonResponse({'message': 'Klacht submitted successfully!'}, status=201)
+            except Exception as e:
+                return HttpResponse(f"An error occurred: {e}")
+        else:
+            # Form is not valid, return validation errors as JSON
+            errors = form.errors.as_json()
+            return JsonResponse({'errors': errors}, status=400)
 
     # Handle GET request or other cases
     return JsonResponse({'error': 'Method not allowed'}, status=405)

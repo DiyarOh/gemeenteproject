@@ -1,3 +1,5 @@
+from django.contrib.auth.models import User
+
 from django.test import TestCase
 from django.urls import reverse
 from datetime import datetime
@@ -9,6 +11,9 @@ from ..forms import ComplaintSearchForm  # Replace with your actual form import
 class ComplaintsDashboardViewTest(TestCase):
     @classmethod
     def setUpTestData(cls):
+        # Create a test user
+        cls.user = User.objects.create_user(username='testuser', password='testpassword')
+
         # Create test data for Klacht and Status models
         status1 = Status.objects.create(waarde=1, beschrijving='aangemaakt')
         status2 = Status.objects.create(waarde=2, beschrijving='in werking')
@@ -30,6 +35,9 @@ class ComplaintsDashboardViewTest(TestCase):
             status=status2
         )
 
+    def setUp(self):
+        # Log in the user before each test
+        self.client.login(username='testuser', password='testpassword')
 
     def test_view_url_exists_at_desired_location(self):
         response = self.client.get('/klacht/dashboard/')

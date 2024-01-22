@@ -1,4 +1,6 @@
 # views.py
+import json
+
 from datetime import datetime
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
@@ -6,17 +8,21 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.edit import FormView
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, DetailView, UpdateView, DeleteView
 from django.contrib.auth.forms import UserCreationForm
 from django.views import View
 from .utils import is_valid_invitation_code 
 from .models import Invitation, Klacht, Status
-from .forms import ComplaintSearchForm, KlachtForm
+from .forms import ComplaintSearchForm, KlachtForm, KlachtStatusForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db import models as geomodels
 from django.http import JsonResponse
 from django.utils import timezone
+from django.core.serializers import serialize
+from django.utils.dateformat import DateFormat
+from django.urls import reverse_lazy
+
 
 # Make sure to import Status model
 from .models import Klacht, Status, Afbeelding
@@ -82,6 +88,20 @@ def logout_view(request):
     # Logout and redirect to login
     logout(request)
     return redirect('login')
+
+
+def serialize_klachten(klachten):
+    # This function will manually serialize the Klacht data and format the dates
+    return json.dumps([
+        {
+            'id': klacht.id,  # Include the ID
+            'naam': klacht.naam,
+            'omschrijving': klacht.omschrijving,
+            'GPS_locatie': {'lat': klacht.GPS_locatie.y, 'lng': klacht.GPS_locatie.x},
+            'datum_melding': DateFormat(klacht.datum_melding).format('c')  # ISO 8601 format
+        }
+        for klacht in klachten
+    ])
 
 # Complaints form view
 class ComplaintsFormView(TemplateView):
@@ -154,6 +174,7 @@ class ComplaintsDashboard(ListView):
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
         status = self.request.GET.get('status')
+        klacht_id = self.request.GET.get('id')
 
         # Retrieve all complaints and order by submission date
         queryset = Klacht.objects.all()
@@ -176,6 +197,9 @@ class ComplaintsDashboard(ListView):
 
         if status:
             queryset = queryset.filter(status__id=status)
+        
+        if klacht_id:
+            queryset = queryset.filter(id=klacht_id)
 
         return queryset
 
@@ -202,51 +226,36 @@ class ComplaintsDashboard(ListView):
 
         return context
 
-# Submit klacht view
-def submit_klacht(request):
-    if request.method == 'POST':
-        print(request.FILES)
-        form = KlachtForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Retrieve form data using cleaned_data
-            naam = form.cleaned_data['naam']
-            omschrijving = form.cleaned_data['omschrijving']
-            email = form.cleaned_data['email']
-            longitude = form.cleaned_data['longitude']  # Change this line
-            latitude = form.cleaned_data['latitude']      # Change this line
-            foto = form.cleaned_data['foto']
+class KlachtMapView(TemplateView):
+    template_name = 'klachtmap.html'
 
-            # Get or create the Status object with ID 1
-            status, created = Status.objects.get_or_create(id=1, defaults={'waarde': 'Default', 'beschrijving': 'Default status'})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-            # Create Klacht object
-            klacht = Klacht(
-                naam=naam,
-                omschrijving=omschrijving,
-                email=email,
-                GPS_locatie=Point(float(longitude), float(latitude)),
-                datum_melding=timezone.now(),
-                status=status
-            )
+        # Retrieve all Klacht objects from the database
+        klachten = Klacht.objects.all()
 
-            try:
-                # Save the Klacht object
-                klacht.save()
-                print(foto)
+        # Add the serialized data to the context
+        context['klachten_json'] = serialize_klachten(klachten)
 
-                # Save uploaded files to the DB
-                if foto:
-                    afbeelding = Afbeelding(klacht=klacht)
-                    afbeelding.image_file = foto
-                    afbeelding.save()
+        return context
+    
 
-                return JsonResponse({'message': 'Klacht submitted successfully!'}, status=201)
-            except Exception as e:
-                return HttpResponse(f"An error occurred: {e}")
-        else:
-            # Form is not valid, return validation errors as JSON
-            errors = form.errors.as_json()
-            return JsonResponse({'errors': errors}, status=400)
+class KlachtDetailView(DetailView, UpdateView):
+    model = Klacht
+    template_name = 'klacht.html'  # specify your template name
+    form_class = KlachtStatusForm
+    context_object_name = 'klacht'
 
-    # Handle GET request or other cases
-    return JsonResponse({'error': 'Method not allowed'}, status=405)
+    def get_success_url(self):
+        return reverse_lazy('klacht', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['afbeeldingen'] = self.object.afbeeldingen.all()  # Add the related images to the context
+        return context
+    
+
+class KlachtDeleteView(DeleteView):
+    model = Klacht
+    success_url = reverse_lazy('complaints_dashboard') 

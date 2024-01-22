@@ -1,0 +1,39 @@
+<!-- Kopieer deze layout zodat je nieuwe paginas gemakkelijk kan programmeren -->
+{% extends 'base.html' %}
+
+{% block title %}Klacht{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="klacht-details">
+        <p class="klacht-description"><b>Omschrijving: </b>{{ klacht.omschrijving }}</p>
+        <p class="klacht-date"> <b>Datum: </b>{{ klacht.datum_melding|date:"d-m-Y H:i" }}</p>
+        <!-- Displaying images -->
+        {% for afbeelding in afbeeldingen %}
+            <img class="klacht-image" src="{{ afbeelding.image_file.url }}" alt="Afbeelding">
+        {% empty %}
+            <p>Geen afbeeldingen beschikbaar.</p>
+        {% endfor %}
+        <p class="klacht-poster"><b>Melder: </b>{{ klacht.naam }}</p>
+    </div>
+
+    <div class="klacht-form">
+        <!-- Form to update status -->
+        <div class="form-container">
+            <!-- Update Status Form -->
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Update Status</button>
+            </form>
+        
+            <!-- Delete Klacht Form -->
+            <form action="{% url 'klacht_delete' klacht.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" onclick="return confirm('Weet je zeker dat je deze klacht wilt verwijderen?');">Delete Klacht</button>
+            </form>
+        </div>
+    
+    </div>
+</div>
+{% endblock %}

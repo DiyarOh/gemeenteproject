@@ -13,12 +13,12 @@
 <style>
     #map {
         height: 480px;
-        width: 735px;
-        float: left;
+        width: 100%;
     }
 
     #form-container {
-        margin-left: 750px;
+        margin-left: 10%;
+        margin-right: 10%;
     }
 
     .form-field {
@@ -93,6 +93,18 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
+        let rotterdamBoundary = L.polygon([
+            [51.96443841311654, 4.377531599429041],
+            [51.97607151869904, 4.428343362776634],
+            [51.963169164357076, 4.447569435394643],
+            [51.98178121088395, 4.468855444364579],
+            [51.96020744414462, 4.5179505940855655],
+            [51.9925641995845, 4.592108302755025],
+            [51.970995625818276, 4.602751307239994],
+            [51.876352003085735, 4.568075711982515],
+            [51.86999293516394, 4.409460612883947],
+            [51.96443841311654, 4.380621503956935]  
+        ]).addTo(map);
 
         // Initialize variables for marker and coordinates input
         let marker;
@@ -105,62 +117,19 @@
             if (marker) {
                 map.removeLayer(marker);
             }
-
-            marker = L.marker(e.latlng).addTo(map);
+            if (rotterdamBoundary.getBounds().contains(e.latlng)) {
+                marker = L.marker(e.latlng).addTo(map);
+                submitButton.disabled = false;
+            } else {
+                alert("Markers can only be placed within Rotterdam.");
+                submitButton.disabled = true;
+            }
 
         longitudeInput.value = e.latlng.lng;
         latitudeInput.value = e.latlng.lat;
         
         // Enable the submit button
-        submitButton.disabled = false;
 
         });
-
-        // Add event listener for form submission
-        // $('#gpsForm').submit(function (event) {
-        //     // Prevent the default form submission
-        //     event.preventDefault();
-
-        //     // Get form data
-        //     let formData = $(this).serializeArray();
-
-        //     // Add latitude and longitude to the formData array
-        //     formData.push({ name: 'latitude', value: marker.getLatLng().lat });
-        //     formData.push({ name: 'longitude', value: marker.getLatLng().lng });
-
-        //     // Make an AJAX request to your Django view
-        //     $.ajax({
-        //         type: 'POST',
-        //         url: '{% url "submit_klacht" %}',
-        //         data: formData,
-        //         headers: {
-        //             'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()
-        //         },
-        //         success: function (response) {
-        //             // Display a success popup
-        //             Swal.fire({
-        //                 title: 'Success!',
-        //                 text: 'Klacht submitted successfully!',
-        //                 icon: 'success',
-        //                 confirmButtonText: 'OK'
-        //             }).then((result) => {
-        //                 // Redirect to a different HTML page after clicking "OK"
-        //                 if (result.isConfirmed) {
-        //                     window.location.href = '{% url "complaints_dashboard" %}';
-        //                 }
-        //             });
-        //         },
-        //         error: function (error) {
-        //             // Display an error popup
-        //             Swal.fire({
-        //                 title: 'Error!',
-        //                 text: 'Error submitting klacht!',
-        //                 icon: 'error',
-        //                 confirmButtonText: 'OK'
-        //             });
-        //             // Handle error, if needed
-        //         }
-        //     });
-        // });
     </script>
 {% endblock %}

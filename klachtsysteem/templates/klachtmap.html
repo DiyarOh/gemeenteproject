@@ -2,6 +2,107 @@
 
 {% block title %}Kaart{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- Include SweetAlert2 CSS and JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<style>
+body {
+    overflow: hidden;
+}
+
+#map {
+    height: 60vh; /* Adjust the height for smaller screens */
+    width: 100%;
+}
+
+#form-container {
+    margin-left: 10px; /* Reduce the margin for smaller screens */
+}
+
+.form-field {
+    margin-bottom: 5px; /* Reduce margin bottom for elements */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input,
+textarea,
+select {
+    width: 100%; /* Full width on all screens */
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    margin-top: 5px; /* Reduce the margin top for button */
+}
+
+/* Media Query for smaller screens, adjust as needed */
+@media screen and (max-width: 768px) {
+    #map {
+        height: 100vh; /* Adjust the height for smaller screens */
+    }
+
+    #form-container {
+        margin-left: 10px; /* Reduce the margin for smaller screens */
+    }
+
+    .form-field {
+        margin-bottom: 5px; /* Reduce margin bottom for elements */
+    }
+
+    input,
+    textarea,
+    select {
+        width: 100%; /* Full width on all screens */
+    }
+
+    button {
+        margin-top: 5px; /* Reduce the margin top for button */
+    }
+}
+</style>
+{% endblock %}
 {% block content %}
-<!-- Dit is waar je de content plaats weet dat de basehtml geen container heeft deze dien je dus hier zelf te plaatsen -->
+<div id="map"></div>
+<script type="text/javascript">
+    // Initialize the map
+    let map = L.map('map').setView([51.9225, 4.47917], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Use the passed Klacht data
+    let klachtenData = JSON.parse('{{ klachten_json|escapejs }}');
+    
+    klachtenData.forEach(function(klacht) {
+    let coords = [klacht.GPS_locatie.lat, klacht.GPS_locatie.lng];
+    let popupContent = `
+        <strong>Omschrijving:</strong> ${klacht.omschrijving}<br>
+        <strong>Naam:</strong> ${klacht.naam}<br>
+        <strong>Datum:</strong> ${new Date(klacht.datum_melding).toLocaleString()}
+    `;
+     let marker = L.marker(coords).addTo(map)
+        .bindPopup(popupContent);
+    // Store the Klacht ID in a custom attribute of the marker
+    marker._klachtId = klacht.id;
+    let baseUrl = '{% url "klacht" pk=0 %}';
+
+    marker.on('dblclick', function() {
+        let klachtDetailUrl = baseUrl.replace('0', klacht.id);
+        window.location.href = klachtDetailUrl;
+    });
+});
+
+</script>
+{% endblock %}
+{% block script %}
 {% endblock %}

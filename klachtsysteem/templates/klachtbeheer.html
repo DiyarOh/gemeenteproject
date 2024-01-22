@@ -32,7 +32,7 @@
                 </thead>
                 <tbody>
                     {% for klacht in klachten %}
-                    <tr>
+                    <tr data-id="{{ klacht.id }}">
                         <td>{{ klacht.omschrijving }}</td>
                         <td>{{ klacht.status.waarde }}</td>
                         <td>{{ klacht.datum_melding|date:"d-m-Y" }}</td>
@@ -59,4 +59,34 @@
     </section>
 
 </main>
+<script type="text/javascript">
+    let baseUrl = '{% url "klacht" pk=0 %}';
+
+    function redirectToKlachtDetail(klachtId) {
+        let klachtDetailUrl = baseUrl.replace('0', klachtId);
+        window.location.href = klachtDetailUrl;
+    }
+
+    // Adding event listener to each table row
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('tr[data-id]').forEach(function(row) {
+            row.addEventListener('click', function() {
+                // Check if it's a touch device (small screen)
+                if ('ontouchstart' in document.documentElement) {
+                    redirectToKlachtDetail(row.getAttribute('data-id'));
+                } else {
+                    // Handle double-click for non-touch devices (desktop)
+                    let clicks = 0;
+                    row.addEventListener('click', function() {
+                        clicks++;
+                        if (clicks === 2) {
+                            redirectToKlachtDetail(row.getAttribute('data-id'));
+                            clicks = 0;
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

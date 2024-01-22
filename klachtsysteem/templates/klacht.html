@@ -2,6 +2,10 @@
 {% extends 'base.html' %}
 
 {% block title %}Klacht{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -34,6 +38,23 @@
             </form>
         </div>
     
+        <!-- Map Section -->
+        <div id="map" style="width: 100%; height: 300px;"></div>
     </div>
 </div>
+<script type="text/javascript">
+    // JavaScript code to initialize the map and display the location
+    let map = L.map('map').setView([{{ klacht.GPS_locatie.y }}, {{ klacht.GPS_locatie.x }}], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Create a marker for the klacht's location
+    let klachtLocation = L.marker([{{ klacht.GPS_locatie.y }}, {{ klacht.GPS_locatie.x }}]).addTo(map);
+
+    // You can add a popup for more information about the location if needed
+    klachtLocation.bindPopup("Klacht Location").openPopup();
+</script>
 {% endblock %}

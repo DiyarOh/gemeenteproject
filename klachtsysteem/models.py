@@ -58,7 +58,7 @@ class Status(models.Model):
 # Klacht model
 class Klacht(models.Model):
     naam = models.CharField(max_length=50, null=False)
-    omschrijving = models.CharField(max_length=50, null=False)
+    omschrijving = models.CharField(max_length=300, null=False)
     email = models.EmailField(null=False)
     GPS_locatie = geomodels.PointField()  # GeoDjango specific field for storing geographic location
     datum_melding = models.DateTimeField(null=False)

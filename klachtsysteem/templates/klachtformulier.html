@@ -13,12 +13,12 @@
 <style>
     #map {
         height: 480px;
-        width: 735px;
-        float: left;
+        width: 100%;
     }
 
     #form-container {
-        margin-left: 750px;
+        margin-left: 10%;
+        margin-right: 10%;
     }
 
     .form-field {
@@ -103,8 +103,9 @@
             [51.970995625818276, 4.602751307239994],
             [51.876352003085735, 4.568075711982515],
             [51.86999293516394, 4.409460612883947],
-            [51.96443841311654, 4.380621503956935]  // Last point to close the polygon
+            [51.96443841311654, 4.380621503956935]  
         ]).addTo(map);
+
         // Initialize variables for marker and coordinates input
         let marker;
         let longitudeInput = document.getElementById('longitude');

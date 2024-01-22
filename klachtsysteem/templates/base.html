@@ -10,17 +10,20 @@
     {% block head %}{% endblock %}
 </head>
 <body>
-    {% if user.is_authenticated %}
         <div class="header">
             <h1>Klachtbeheer Rotterdam</h1>
             <div class="menu-buttons">
-                <button onclick="location.href='{% url "kaart"%}'">Kaart</button>
                 <button onclick="location.href='{% url "complaints_form"%}'">Klacht Formulier</button>
-                <button onclick="location.href='{% url "complaints_dashboard"%}'">Klachten</button>
+                {% if not user.is_authenticated %}
+                    <button onclick="location.href='{% url 'login' %}'">Login</button>
+                {% endif %}                
+                 {% if user.is_authenticated %}
+                    <button onclick="location.href='{% url "kaart"%}'">Kaart</button>
+                    <button onclick="location.href='{% url "complaints_dashboard"%}'">Klachten</button>
+                    <button onclick="location.href='{% url "logout"%}'">Uitloggen</button>
+                {% endif %}
             </div>
         </div>
-    {% endif %}
-
     {% block content %}
     {% endblock %}
     {% block scripts %}

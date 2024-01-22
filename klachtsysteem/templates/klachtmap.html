@@ -11,38 +11,64 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
 <style>
-    body{
-        overflow: hidden;
-    }
+body {
+    overflow: hidden;
+}
+
+#map {
+    height: 60vh; /* Adjust the height for smaller screens */
+    width: 100%;
+}
+
+#form-container {
+    margin-left: 10px; /* Reduce the margin for smaller screens */
+}
+
+.form-field {
+    margin-bottom: 5px; /* Reduce margin bottom for elements */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input,
+textarea,
+select {
+    width: 100%; /* Full width on all screens */
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    margin-top: 5px; /* Reduce the margin top for button */
+}
+
+/* Media Query for smaller screens, adjust as needed */
+@media screen and (max-width: 768px) {
     #map {
-        height: 100vh;
-        width: 100%;
+        height: 100vh; /* Adjust the height for smaller screens */
     }
 
     #form-container {
-        margin-left: 750px;
+        margin-left: 10px; /* Reduce the margin for smaller screens */
     }
 
     .form-field {
-        margin-bottom: 10px;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 5px;
+        margin-bottom: 5px; /* Reduce margin bottom for elements */
     }
 
     input,
     textarea,
     select {
-        width: calc(100% - 12px);
-        padding: 5px;
-        box-sizing: border-box;
+        width: 100%; /* Full width on all screens */
     }
 
     button {
-        margin-top: 10px;
+        margin-top: 5px; /* Reduce the margin top for button */
     }
+}
 </style>
 {% endblock %}
 {% block content %}
@@ -68,9 +94,11 @@
         .bindPopup(popupContent);
     // Store the Klacht ID in a custom attribute of the marker
     marker._klachtId = klacht.id;
+    let baseUrl = '{% url "klacht" pk=0 %}';
 
     marker.on('dblclick', function() {
-        window.location.href = '/klacht/' + klacht.id; // Redirect to the Klacht detail page
+        let klachtDetailUrl = baseUrl.replace('0', klacht.id);
+        window.location.href = klachtDetailUrl;
     });
 });
 

@@ -8,12 +8,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.edit import FormView
-from django.views.generic import TemplateView, ListView
+from django.views.generic import TemplateView, ListView, DetailView, UpdateView, DeleteView
 from django.contrib.auth.forms import UserCreationForm
 from django.views import View
 from .utils import is_valid_invitation_code 
 from .models import Invitation, Klacht, Status
-from .forms import ComplaintSearchForm, KlachtForm
+from .forms import ComplaintSearchForm, KlachtForm, KlachtStatusForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db import models as geomodels
@@ -21,7 +21,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.utils.dateformat import DateFormat
-
+from django.urls import reverse_lazy
 
 
 # Make sure to import Status model
@@ -174,6 +174,7 @@ class ComplaintsDashboard(ListView):
         start_date = self.request.GET.get('start_date')
         end_date = self.request.GET.get('end_date')
         status = self.request.GET.get('status')
+        klacht_id = self.request.GET.get('id')
 
         # Retrieve all complaints and order by submission date
         queryset = Klacht.objects.all()
@@ -196,6 +197,9 @@ class ComplaintsDashboard(ListView):
 
         if status:
             queryset = queryset.filter(status__id=status)
+        
+        if klacht_id:
+            queryset = queryset.filter(id=klacht_id)
 
         return queryset
 
@@ -235,3 +239,23 @@ class KlachtMapView(TemplateView):
         context['klachten_json'] = serialize_klachten(klachten)
 
         return context
+    
+
+class KlachtDetailView(DetailView, UpdateView):
+    model = Klacht
+    template_name = 'klacht.html'  # specify your template name
+    form_class = KlachtStatusForm
+    context_object_name = 'klacht'
+
+    def get_success_url(self):
+        return reverse_lazy('klacht', kwargs={'pk': self.object.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['afbeeldingen'] = self.object.afbeeldingen.all()  # Add the related images to the context
+        return context
+    
+
+class KlachtDeleteView(DeleteView):
+    model = Klacht
+    success_url = reverse_lazy('complaints_dashboard') 

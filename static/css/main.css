@@ -230,3 +230,169 @@ body {
     width: 100%;
     /* other styles */
 }
+
+
+/* Klacht detail */
+.container {
+  display: flex;
+  justify-content: space-around;
+  margin: 5%;
+}
+.klacht-details {
+  flex: 1;
+  margin-right: 20px;
+}
+.klacht-image {
+  width: 340px;
+  height: auto;
+  max-height: 500px;
+  margin-bottom: 10px;
+}
+.klacht-form {
+  flex: 1;
+  padding: 20px;
+
+}
+.klacht-title {
+  margin-bottom: 5px;
+  font-size: 24px;
+  color: #333;
+}
+.klacht-description {
+  margin-bottom: 10px;
+  color: #666;
+}
+.klacht-date {
+  margin-bottom: 10px;
+  color: #666;
+}
+.klacht-poster {
+  margin-top: 10px;
+  font-weight: bold;
+}
+.form-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.form-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive Login and Registration Forms */
+@media screen and (max-width: 600px) {
+  .login-container, .register-container {
+      width: 100%; /* Full width on small screens */
+      margin: 10px;
+  }
+}
+
+/* Responsive Dashboard Sections */
+@media screen and (max-width: 768px) {
+  .flex-container {
+      flex-direction: column;
+  }
+
+  .filters-section, .results-section {
+      margin: 0 0 20px 0; /* Adjust margin for stacked layout */
+  }
+
+  .search-form {
+      width: 100%;
+      margin: 20px 0;
+  }
+}
+
+/* Responsive Klacht Detail */
+@media screen and (max-width: 768px) {
+  .container {
+      flex-direction: column;
+  }
+
+  .klacht-details, .klacht-form {
+      margin-right: 0;
+      margin-bottom: 20px;
+      width: 100%; /* Full width on smaller screens */
+  }
+}
+
+
+@media screen and (max-width: 600px) {
+  .pagination a, .pagination span {
+      padding: 6px 12px; /* Slightly smaller padding */
+      font-size: 0.8em; /* Smaller font size */
+      margin: 0 2px;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .klacht-image {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    margin-bottom: 10px;
+  }
+  .klacht-form{
+    padding: 0;
+  }
+  .pagination a, .pagination span {
+      padding: 4px 8px; /* Even smaller padding for very small screens */
+      margin: 0 1px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .menu-buttons {
+      position: static; /* Change positioning on smaller screens */
+      transform: translateY(0); /* Remove transform */
+      text-align: center; /* Center-align the buttons */
+      margin-top: 20px; /* Add some space above the buttons */
+  }
+
+  .menu-buttons button {
+      font-size: large; /* Reduce font size */
+      padding: 5px 10px; /* Reduce padding */
+      margin-left: 5px; /* Reduce margin between buttons */
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .login_body{
+    align-items: start;
+  }
+  .login-container, .register-container {
+      width: 90%; /* Adjust width to take up more screen space on small devices */
+      margin: 10px; /* Add some margin around the container */
+  }
+
+  .login-container, .register-container {
+      padding: 10px; /* Adjust padding for smaller screens */
+  }
+
+  input[type="text"], input[type="password"] {
+      padding: 8px; /* Adjust input padding for smaller screens */
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .login-container, .register-container {
+      width: 100%; /* Full width for very small screens */
+      border-radius: 0; /* Optional: Remove border-radius for a full-width look */
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .results-section {
+      overflow-x: auto; /* Enable horizontal scrolling */
+  }
+
+  .results-table {
+      min-width: 600px; /* Set a minimum width for the table */
+  }
+
+  .results-table th, .results-table td {
+      padding: 5px; /* Reduce padding for smaller screens */
+  }
+}

@@ -47,6 +47,7 @@
 <body>
     <!-- Leaflet Map Container -->
     <div id="map"></div>
+    <button id="get-location-button">Get My Location</button>
 
     <!-- Form Container -->
     <div id="form-container">
@@ -131,5 +132,47 @@
         // Enable the submit button
 
         });
+
+        // Add click event listener to "Get My Location" button
+document.getElementById('get-location-button').addEventListener('click', function () {
+    if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            const userLatLng = [position.coords.latitude, position.coords.longitude];
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            if (rotterdamBoundary.getBounds().contains(userLatLng)) {
+                marker = L.marker(userLatLng).addTo(map);
+                submitButton.disabled = false;
+            } else {
+                alert("Your location is outside Rotterdam.");
+                submitButton.disabled = true;
+            }
+
+            // Update input fields with user's coordinates
+            longitudeInput.value = position.coords.longitude;
+            latitudeInput.value = position.coords.latitude;
+        }, function (error) {
+            switch (error.code) {
+                case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                case error.UNKNOWN_ERROR:
+                    alert("An unknown error occurred.");
+                    break;
+            }
+        });
+    } else {
+        alert("Geolocation is not supported by your browser.");
+    }
+});
+
     </script>
+
 {% endblock %}

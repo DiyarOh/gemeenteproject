@@ -120,8 +120,8 @@ class ComplaintsFormView(TemplateView):
             naam = form.cleaned_data['naam']
             omschrijving = form.cleaned_data['omschrijving']
             email = form.cleaned_data['email']
-            longitude = form.cleaned_data['longitude']  # Change this line
-            latitude = form.cleaned_data['latitude']      # Change this line
+            longitude = form.cleaned_data['longitude'] 
+            latitude = form.cleaned_data['latitude'] 
             foto = form.cleaned_data['foto']
 
             # Get or create the Status object with ID 1
@@ -218,11 +218,19 @@ class ComplaintsDashboard(ListView):
         except EmptyPage:
             klachten = paginator.page(paginator.num_pages)
 
+        # Check for klachten older than 2 weeks
+        two_weeks_ago = timezone.now() - timezone.timedelta(weeks=2)
+        old_klachten = filtered_queryset.filter(datum_melding__lt=two_weeks_ago)
+        
         # Prepare context data
         context = super(ComplaintsDashboard, self).get_context_data(**kwargs)
         context[self.context_object_name] = klachten
         context['search_form'] = ComplaintSearchForm(self.request.GET)
         context['statuses'] = Status.objects.all()
+
+        # Add a notification if there are old klachten
+        if old_klachten.exists():
+            context['old_klachten_notification'] = f"There are {old_klachten.count()} klachten older than 2 weeks."
 
         return context
 
